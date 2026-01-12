@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -30,22 +31,30 @@ func main() {
 			continue
 		}
 		result := digitsCalculation(operation, digits)
-		fmt.Println("Результат калькуляции: ", result)
+		fmt.Println("Результат калькуляции:", result)
+		fmt.Print("Продолжить? (Y/n): ")
+		var checkContinue string
+		check, err := isContinue(checkContinue)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		if !check {
+			break
+		}
 	}
 }
 
-// func getUserInput() (string, []int64, error) {
-// 	fmt.Print(msgOperation)
-// 	operation, err := getUserOperation()
-// 	if err != nil {
-// 		return operation, nil, err
-// 	}
-// 	digits, err := getUserDigits()
-// 	if err != nil {
-// 		return operation, nil, err
-// 	}
-// 	return operation, digits, err
-// }
+func isContinue(check string) (bool, error) {
+	_, err := fmt.Scan(&check)
+	if err != nil {
+		return false, err
+	}
+	if check != "y" && check != "Y" {
+		return false, nil
+	}
+	return true, nil
+}
 
 func getUserOperation() (string, error) {
 	var res string
@@ -88,6 +97,9 @@ func getUserDigits() ([]int64, error) {
 }
 
 func digitsCalculation(operation string, digits []int64) (result int64) {
+	if len(digits) == 0 {
+		return 0
+	}
 	switch operation {
 	case SUM:
 		for _, value := range digits {
@@ -99,14 +111,20 @@ func digitsCalculation(operation string, digits []int64) (result int64) {
 			tmpResult += value
 		}
 		result = tmpResult / int64(len(digits))
-	}
 
+	case MED:
+		tmpResult := digits
+		sort.Slice(tmpResult, func(i, j int) bool {
+			return tmpResult[i] < tmpResult[j]
+		})
+		n := len(tmpResult)
+		mid := n / 2
+
+		if n%2 == 1 {
+			result = tmpResult[mid]
+		} else {
+			result = (tmpResult[mid-1] + tmpResult[mid]) / 2
+		}
+	}
 	return result
 }
-
-//
-// func inpitResult() {
-// }
-//
-// func errHandling(err error) {
-// }
