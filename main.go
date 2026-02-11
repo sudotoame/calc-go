@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+var operationMap = map[string]func([]int64) int64{
+	SUM: mySum,
+	AVG: myAvg,
+	MED: myMed,
+}
+
 const (
 	AVG          = "AVG"
 	SUM          = "SUM"
@@ -30,7 +36,8 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
-		result := digitsCalculation(operation, digits)
+		calculation := operationMap[operation]
+		result := calculation(digits)
 		fmt.Println("Результат калькуляции:", result)
 		fmt.Print("Продолжить? (Y/n): ")
 		var checkContinue string
@@ -96,35 +103,36 @@ func getUserDigits() ([]int64, error) {
 	return numbers, nil
 }
 
-func digitsCalculation(operation string, digits []int64) (result int64) {
-	if len(digits) == 0 {
-		return 0
+func mySum(digits []int64) int64 {
+	var result int64
+	for _, value := range digits {
+		result += value
 	}
-	switch operation {
-	case SUM:
-		for _, value := range digits {
-			result += value
-		}
-	case AVG:
-		var tmpResult int64
-		for _, value := range digits {
-			tmpResult += value
-		}
-		result = tmpResult / int64(len(digits))
+	return result
+}
 
-	case MED:
-		tmpResult := digits
-		sort.Slice(tmpResult, func(i, j int) bool {
-			return tmpResult[i] < tmpResult[j]
-		})
-		n := len(tmpResult)
-		mid := n / 2
+func myAvg(digits []int64) int64 {
+	var result int64
+	for _, value := range digits {
+		result += value
+	}
+	result = result / int64(len(digits))
+	return result
+}
 
-		if n%2 == 1 {
-			result = tmpResult[mid]
-		} else {
-			result = (tmpResult[mid-1] + tmpResult[mid]) / 2
-		}
+func myMed(digits []int64) int64 {
+	var result int64
+	tmpResult := digits
+	sort.Slice(tmpResult, func(i, j int) bool {
+		return tmpResult[i] < tmpResult[j]
+	})
+	n := len(tmpResult)
+	mid := n / 2
+
+	if n%2 == 1 {
+		result = tmpResult[mid]
+	} else {
+		result = (tmpResult[mid-1] + tmpResult[mid]) / 2
 	}
 	return result
 }
